@@ -1,0 +1,174 @@
+package com.citibanamex.api.cards.controller;
+
+import static org.junit.Assert.assertEquals;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.springframework.boot.context.embedded.LocalServerPort;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import com.citibanamex.api.cards.CardsApplication;
+import com.citibanamex.api.cards.model.blockcardreq.BlockCardRequest;
+
+
+
+
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = CardsApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+public class CardsControllerTest {
+
+	@LocalServerPort
+	private int port;
+	
+	TestRestTemplate restTemplate = new TestRestTemplate();	
+	
+	public String createURLWithPort(String resource){
+		String URL = "http://localhost:"+this.port+resource;
+		return URL;
+	}
+	
+	@Test
+	public void testGetCardsByCustomer(){
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("client_id", "ffe4d269-1c59-493b-94f4-fbca960bc0f0");
+		headers.set("Authorization", "Basic 4r43rf3f4gt4");
+		headers.set("uuid", "fewft34tggregreg");
+		
+		DateFormat df = new SimpleDateFormat("MMddyyyyHHmmss");
+		String currentDateTime = df.format(new Date(System.currentTimeMillis()));
+		
+		JSONObject payload = null;
+		JSONObject jsonOpObject = null;
+		JSONObject jsonAccObject = null;			
+		try {
+			jsonAccObject = new JSONObject();
+			jsonAccObject.put("requestMessageId", "0003");
+			jsonAccObject.put("requestVersionNumber", "15");
+			jsonAccObject.put("requestTerminalId", "00000000MX");
+			jsonAccObject.put("requestUserId", "");
+			jsonAccObject.put("requestDateTime", currentDateTime);
+			jsonAccObject.put("requestChannelInd", "ECL");
+			jsonAccObject.put("requestCustomerOrg", "322");
+			jsonAccObject.put("requestRelationshipNumber", "0000000000059411393");
+			jsonOpObject = new JSONObject().put("getRelationshipAcctReq", jsonAccObject);
+			payload = new JSONObject().put("GBOF0003Operation", jsonOpObject);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		
+		HttpEntity<String> entity = new HttpEntity<String>(payload.toString(), headers);		
+		ResponseEntity<String> serviceResponse = restTemplate.exchange(createURLWithPort("/v1/customers/0000000000059411393/cards"),
+						HttpMethod.GET, entity,String.class);		
+		String expected = "{\"cards\":[{\"creditCardAccounts\":[{\"cardNumber\":\"0004037070000113615\",\"accountStatus\":\"A\",\"accountId\":\"0004037070000113698\",\"productName\":\"\",\"displayAccountNumber\":\"0004037070000113698\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"7092018\",\"balOfLastStmt\":\"4295.0\",\"creditLimit\":1.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"7092018\"},{\"cardNumber\":\"0004037070000113698\",\"accountStatus\":\"A\",\"accountId\":\"0004037070000113698\",\"productName\":\"\",\"displayAccountNumber\":\"0004037070000113698\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"7092018\",\"balOfLastStmt\":\"4295.0\",\"creditLimit\":1.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"7092018\"},{\"cardNumber\":\"0004082450412711814\",\"accountStatus\":\"T\",\"accountId\":\"0004082450412711897\",\"productName\":\"\",\"displayAccountNumber\":\"0004082450412711897\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"5162016\",\"balOfLastStmt\":\"43280.01\",\"creditLimit\":50000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"5162016\"},{\"cardNumber\":\"0004082450412711822\",\"accountStatus\":\"T\",\"accountId\":\"0004082450412711897\",\"productName\":\"\",\"displayAccountNumber\":\"0004082450412711897\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"5162016\",\"balOfLastStmt\":\"43280.01\",\"creditLimit\":50000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"5162016\"},{\"cardNumber\":\"0004082450412711830\",\"accountStatus\":\"T\",\"accountId\":\"0004082450412711897\",\"productName\":\"\",\"displayAccountNumber\":\"0004082450412711897\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"5162016\",\"balOfLastStmt\":\"43280.01\",\"creditLimit\":50000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"5162016\"},{\"cardNumber\":\"0004082450412711897\",\"accountStatus\":\"T\",\"accountId\":\"0004082450412711897\",\"productName\":\"\",\"displayAccountNumber\":\"0004082450412711897\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"5162016\",\"balOfLastStmt\":\"43280.01\",\"creditLimit\":65000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"5162016\"},{\"cardNumber\":\"0004082459100273367\",\"accountStatus\":\"T\",\"accountId\":\"0004082450412711897\",\"productName\":\"\",\"displayAccountNumber\":\"0004082450412711897\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"5162016\",\"balOfLastStmt\":\"43280.01\",\"creditLimit\":65000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"5162016\"},{\"cardNumber\":\"0004082459100273508\",\"accountStatus\":\"T\",\"accountId\":\"0004082450412711897\",\"productName\":\"\",\"displayAccountNumber\":\"0004082450412711897\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"5162016\",\"balOfLastStmt\":\"43280.01\",\"creditLimit\":50000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"5162016\"},{\"cardNumber\":\"0004295220008496895\",\"accountStatus\":\"T\",\"accountId\":\"0004540570005092292\",\"productName\":\"\",\"displayAccountNumber\":\"0004540570005092292\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"12162016\",\"balOfLastStmt\":\"29602.36\",\"creditLimit\":0.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"12162016\"},{\"cardNumber\":\"0004540570005092219\",\"accountStatus\":\"T\",\"accountId\":\"0004540570005092292\",\"productName\":\"\",\"displayAccountNumber\":\"0004540570005092292\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"12162016\",\"balOfLastStmt\":\"29602.36\",\"creditLimit\":183000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"12162016\"},{\"cardNumber\":\"0004540570005092227\",\"accountStatus\":\"T\",\"accountId\":\"0004540570005092292\",\"productName\":\"\",\"displayAccountNumber\":\"0004540570005092292\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"12162016\",\"balOfLastStmt\":\"29602.36\",\"creditLimit\":212000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"12162016\"},{\"cardNumber\":\"0004540570005092292\",\"accountStatus\":\"T\",\"accountId\":\"0004540570005092292\",\"productName\":\"\",\"displayAccountNumber\":\"0004540570005092292\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"12162016\",\"balOfLastStmt\":\"29602.36\",\"creditLimit\":183000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"12162016\"},{\"cardNumber\":\"0004540570500183638\",\"accountStatus\":\"T\",\"accountId\":\"0004540570005092292\",\"productName\":\"\",\"displayAccountNumber\":\"0004540570005092292\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"12162016\",\"balOfLastStmt\":\"29602.36\",\"creditLimit\":212000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"12162016\"},{\"cardNumber\":\"0005288439116130370\",\"accountStatus\":\"A\",\"accountId\":\"0005288439116130370\",\"productName\":\"\",\"displayAccountNumber\":\"0005288439116130370\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"7092018\",\"balOfLastStmt\":\"2269.8\",\"creditLimit\":212000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"7092018\"},{\"cardNumber\":\"0005288439116130388\",\"accountStatus\":\"A\",\"accountId\":\"0005288439116130370\",\"productName\":\"\",\"displayAccountNumber\":\"0005288439116130370\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"7092018\",\"balOfLastStmt\":\"2269.8\",\"creditLimit\":212000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"7092018\"},{\"cardNumber\":\"0005290289957447235\",\"accountStatus\":\"A\",\"accountId\":\"0005288439116130370\",\"productName\":\"\",\"displayAccountNumber\":\"0005288439116130370\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"7092018\",\"balOfLastStmt\":\"2269.8\",\"creditLimit\":0.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"7092018\"},{\"cardNumber\":\"0005482369040257136\",\"accountStatus\":\"A\",\"accountId\":\"0005482369040257136\",\"productName\":\"\",\"displayAccountNumber\":\"0005482369040257136\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"7092018\",\"balOfLastStmt\":\"4041.28\",\"creditLimit\":65000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"7092018\"},{\"cardNumber\":\"0005482369040257144\",\"accountStatus\":\"A\",\"accountId\":\"0005482369040257136\",\"productName\":\"\",\"displayAccountNumber\":\"0005482369040257136\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"7092018\",\"balOfLastStmt\":\"4041.28\",\"creditLimit\":50000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"7092018\"},{\"cardNumber\":\"0005482369040257151\",\"accountStatus\":\"A\",\"accountId\":\"0005482369040257136\",\"productName\":\"\",\"displayAccountNumber\":\"0005482369040257136\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"7092018\",\"balOfLastStmt\":\"4041.28\",\"creditLimit\":50000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"7092018\"}]}]}{\"cards\":[{\"creditCardAccounts\":[{\"cardNumber\":\"0004037070000113615\",\"accountStatus\":\"A\",\"accountId\":\"0004037070000113698\",\"productName\":\"\",\"displayAccountNumber\":\"0004037070000113698\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"7092018\",\"balOfLastStmt\":\"4295.0\",\"creditLimit\":1.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"7092018\"},{\"cardNumber\":\"0004037070000113698\",\"accountStatus\":\"A\",\"accountId\":\"0004037070000113698\",\"productName\":\"\",\"displayAccountNumber\":\"0004037070000113698\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"7092018\",\"balOfLastStmt\":\"4295.0\",\"creditLimit\":1.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"7092018\"},{\"cardNumber\":\"0004082450412711814\",\"accountStatus\":\"T\",\"accountId\":\"0004082450412711897\",\"productName\":\"\",\"displayAccountNumber\":\"0004082450412711897\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"5162016\",\"balOfLastStmt\":\"43280.01\",\"creditLimit\":50000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"5162016\"},{\"cardNumber\":\"0004082450412711822\",\"accountStatus\":\"T\",\"accountId\":\"0004082450412711897\",\"productName\":\"\",\"displayAccountNumber\":\"0004082450412711897\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"5162016\",\"balOfLastStmt\":\"43280.01\",\"creditLimit\":50000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"5162016\"},{\"cardNumber\":\"0004082450412711830\",\"accountStatus\":\"T\",\"accountId\":\"0004082450412711897\",\"productName\":\"\",\"displayAccountNumber\":\"0004082450412711897\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"5162016\",\"balOfLastStmt\":\"43280.01\",\"creditLimit\":50000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"5162016\"},{\"cardNumber\":\"0004082450412711897\",\"accountStatus\":\"T\",\"accountId\":\"0004082450412711897\",\"productName\":\"\",\"displayAccountNumber\":\"0004082450412711897\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"5162016\",\"balOfLastStmt\":\"43280.01\",\"creditLimit\":65000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"5162016\"},{\"cardNumber\":\"0004082459100273367\",\"accountStatus\":\"T\",\"accountId\":\"0004082450412711897\",\"productName\":\"\",\"displayAccountNumber\":\"0004082450412711897\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"5162016\",\"balOfLastStmt\":\"43280.01\",\"creditLimit\":65000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"5162016\"},{\"cardNumber\":\"0004082459100273508\",\"accountStatus\":\"T\",\"accountId\":\"0004082450412711897\",\"productName\":\"\",\"displayAccountNumber\":\"0004082450412711897\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"5162016\",\"balOfLastStmt\":\"43280.01\",\"creditLimit\":50000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"5162016\"},{\"cardNumber\":\"0004295220008496895\",\"accountStatus\":\"T\",\"accountId\":\"0004540570005092292\",\"productName\":\"\",\"displayAccountNumber\":\"0004540570005092292\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"12162016\",\"balOfLastStmt\":\"29602.36\",\"creditLimit\":0.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"12162016\"},{\"cardNumber\":\"0004540570005092219\",\"accountStatus\":\"T\",\"accountId\":\"0004540570005092292\",\"productName\":\"\",\"displayAccountNumber\":\"0004540570005092292\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"12162016\",\"balOfLastStmt\":\"29602.36\",\"creditLimit\":183000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"12162016\"},{\"cardNumber\":\"0004540570005092227\",\"accountStatus\":\"T\",\"accountId\":\"0004540570005092292\",\"productName\":\"\",\"displayAccountNumber\":\"0004540570005092292\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"12162016\",\"balOfLastStmt\":\"29602.36\",\"creditLimit\":212000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"12162016\"},{\"cardNumber\":\"0004540570005092292\",\"accountStatus\":\"T\",\"accountId\":\"0004540570005092292\",\"productName\":\"\",\"displayAccountNumber\":\"0004540570005092292\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"12162016\",\"balOfLastStmt\":\"29602.36\",\"creditLimit\":183000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"12162016\"},{\"cardNumber\":\"0004540570500183638\",\"accountStatus\":\"T\",\"accountId\":\"0004540570005092292\",\"productName\":\"\",\"displayAccountNumber\":\"0004540570005092292\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"12162016\",\"balOfLastStmt\":\"29602.36\",\"creditLimit\":212000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"12162016\"},{\"cardNumber\":\"0005288439116130370\",\"accountStatus\":\"A\",\"accountId\":\"0005288439116130370\",\"productName\":\"\",\"displayAccountNumber\":\"0005288439116130370\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"7092018\",\"balOfLastStmt\":\"2269.8\",\"creditLimit\":212000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"7092018\"},{\"cardNumber\":\"0005288439116130388\",\"accountStatus\":\"A\",\"accountId\":\"0005288439116130370\",\"productName\":\"\",\"displayAccountNumber\":\"0005288439116130370\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"7092018\",\"balOfLastStmt\":\"2269.8\",\"creditLimit\":212000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"7092018\"},{\"cardNumber\":\"0005290289957447235\",\"accountStatus\":\"A\",\"accountId\":\"0005288439116130370\",\"productName\":\"\",\"displayAccountNumber\":\"0005288439116130370\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"7092018\",\"balOfLastStmt\":\"2269.8\",\"creditLimit\":0.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"7092018\"},{\"cardNumber\":\"0005482369040257136\",\"accountStatus\":\"A\",\"accountId\":\"0005482369040257136\",\"productName\":\"\",\"displayAccountNumber\":\"0005482369040257136\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"7092018\",\"balOfLastStmt\":\"4041.28\",\"creditLimit\":65000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"7092018\"},{\"cardNumber\":\"0005482369040257144\",\"accountStatus\":\"A\",\"accountId\":\"0005482369040257136\",\"productName\":\"\",\"displayAccountNumber\":\"0005482369040257136\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"7092018\",\"balOfLastStmt\":\"4041.28\",\"creditLimit\":50000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"7092018\"},{\"cardNumber\":\"0005482369040257151\",\"accountStatus\":\"A\",\"accountId\":\"0005482369040257136\",\"productName\":\"\",\"displayAccountNumber\":\"0005482369040257136\",\"accountNickname\":\"\",\"outstandingBalance\":0.0,\"currencyCode\":\"000\",\"paymentDueDate\":\"7092018\",\"balOfLastStmt\":\"4041.28\",\"creditLimit\":50000.0,\"minimumPaymentAmt\":\"\",\"minimumPaymentDueDate\":\"7092018\"}]}]}";
+		
+		assertEquals(HttpStatus.OK, serviceResponse.getStatusCode());
+		JSONAssert.assertEquals(expected, serviceResponse.getBody(), false);		
+	}
+	
+	@Test
+	public void testBlockCard(){
+		
+		BlockCardRequest request = new BlockCardRequest();
+		request.setCardNumber("0001234567812345678");
+		request.setDurationDays("10");
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("client_id", "eqd732edqwq");
+		headers.set("Authorization", "Basic 4r43rf3f4gt4");
+		headers.set("uuid", "fewft34tggregreg");
+		
+		JSONObject operation  = new JSONObject();
+		JSONObject area  = new JSONObject();
+		JSONObject grp  = new JSONObject();
+		JSONObject jObject  = new JSONObject();
+		String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH.mm.ss.SSSSSS").format(new Date(System.currentTimeMillis()));
+		
+		try {
+			jObject.put("mli_2xl_i_message_id","6004");
+			 jObject.put("mli_2xl_i_version_nbr", "00");
+			    jObject.put("mli_2xl_i_terminal_id", "ECLCARDSMX");
+			    jObject.put("mli_2xl_i_user_id", "RG07925");
+			    jObject.put("mli_2xl_i_timestamp", timeStamp);
+			    jObject.put("mli_2xl_i_org", "000");
+			    jObject.put("mli_2xl_i_card_nbr", request.getCardNumber());
+			    jObject.put("mli_2xl_i_ovc_cd", "7");
+			    jObject.put("mli_2xl_i_ovc_pur_days", request.getDurationDays());
+			    grp.put("mli_2xl_i_hdr_grp", jObject);
+			    area.put("mli_2xl_i_area", grp);	    
+			    operation.put("EWOEW2XLOperation", area);
+		} catch (JSONException e) {				
+			e.printStackTrace();
+		}
+		
+		System.out.println("PAYLOAD : " + operation);
+		HttpEntity<String> entity = new HttpEntity<String>(operation.toString(), headers);
+		
+		ResponseEntity<String> response = restTemplate.exchange(createURLWithPort("/v1/cards/serving/block"),
+				HttpMethod.POST, entity,String.class);
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+	}
+	
+	@Test
+	public void testUnBlockCard(){
+		BlockCardRequest request = new BlockCardRequest();
+		request.setCardNumber("0001234567812345678");
+		
+		HttpHeaders headers = new HttpHeaders();
+		//headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		//headers.set("client_id", "ffe4d269-1c59-493b-94f4-fbca960bc0f0");
+		//headers.set("Authorization", "Basic 4r43rf3f4gt4");
+		//headers.set("uuid", "fewft34tggregreg");
+		
+		JSONObject operation  = new JSONObject();
+		JSONObject area  = new JSONObject();
+		JSONObject grp  = new JSONObject();
+		JSONObject jObject  = new JSONObject();
+		String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH.mm.ss.SSSSSS").format(new Date(System.currentTimeMillis()));
+		
+		try {
+			jObject.put("mli_2xl_i_message_id","6004");
+			 jObject.put("mli_2xl_i_version_nbr", "00");
+			    jObject.put("mli_2xl_i_terminal_id", "ECLCARDSMX");
+			    jObject.put("mli_2xl_i_user_id", "RG07925");
+			    jObject.put("mli_2xl_i_timestamp", timeStamp);
+			    jObject.put("mli_2xl_i_org", "000");
+			    jObject.put("mli_2xl_i_card_nbr", request.getCardNumber());
+			    jObject.put("mli_2xl_i_ovc_cd", "7");
+			    jObject.put("mli_2xl_i_ovc_pur_days", request.getDurationDays());
+			    grp.put("mli_2xl_i_hdr_grp", jObject);
+			    area.put("mli_2xl_i_area", grp);	    
+			    operation.put("EWOEW2XLOperation", area);
+		} catch (JSONException e) {				
+			e.printStackTrace();
+		}
+		
+		System.out.println("PAYLOAD : " + operation);
+		HttpEntity<String> entity = new HttpEntity<String>(operation.toString(), headers);
+		
+		ResponseEntity<String> response = restTemplate.exchange(createURLWithPort("/v1/cards/serving/unblock"),
+				HttpMethod.POST, entity,String.class);
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+	}
+}
