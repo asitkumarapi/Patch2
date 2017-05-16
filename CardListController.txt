@@ -1,0 +1,215 @@
+package com.citibanamex.api.cards.controller;
+
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.xml.datatype.DatatypeConfigurationException;
+
+
+
+import com.citibanamex.api.cards.exception.CardException;
+
+
+import org.json.JSONException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+
+
+import com.citibanamex.api.cards.hateoas.Response;
+import com.citibanamex.api.cards.service.CardService;
+import com.citibanamex.api.cards.model.BlockCardStatus;
+import com.citibanamex.api.cards.model.blockcardreq.BlockCardRequest;
+import com.citibanamex.api.cards.model.blockcardresp.ResponseData;
+import com.citibanamex.api.cards.model.cardlistresp.CardResponse;
+import com.citibanamex.api.cards.model.unblockcardreq.UnBlockCardRequest;
+import com.citibanamex.api.cards.model.unblockcardresp.UnBlockCardResponse;
+
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+
+/**
+ * @author Asit Samantray
+ * 
+ * 
+ *         This service is returns list of credit card based on customer number
+ *         or relationship number associated with a
+ *         customer. @PathVariable("customerRelationsNumber") - customer number
+ *         is passed as request path variable. @RequestHeader("client_id") -
+ *         ClientId is passed as request header
+ *         variable. @RequestHeader("Authorization") - Authorization is passed
+ *         as request header variable. @RequestHeader("releationshipNbr") -
+ *         customer relationship number is passed as request header variable.
+ * 
+ * 
+ */
+
+@RestController
+//@RequestMapping("/v1")
+public class CardsController {
+
+	private static final Logger logger = LoggerFactory.getLogger(CardsController.class);
+
+	String data = null;
+	UnBlockCardResponse response = null;
+	ResponseData responseData = null;
+	BlockCardStatus status = null;
+	CardResponse creditCards = null;
+	Map<String, String> requestData = null;
+
+	@Autowired
+	CardService cardService;
+
+	@RequestMapping(value = "/creditCards/customerAccounts/customer/{customerId}/accounts", method = RequestMethod.GET)
+	@ApiOperation(value = "getCardsByCustomer", nickname = "Get the list of cards by customer account")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Success"),
+			@ApiResponse(code = 401, message = "Unauthorized"), @ApiResponse(code = 403, message = "Forbidden"),
+			@ApiResponse(code = 500, message = "Failure") })
+	public ResponseEntity <CardResponse> getCardsByCustomer(@PathVariable("customerId") String cusId,
+			@RequestHeader("client_id") String clientId, @RequestHeader("Authorization") String auth,
+			@RequestHeader("uuid") String uuid,@RequestHeader("terminalId") String termId,@RequestHeader("userId") String user,
+			@RequestHeader("channelIndicator") String channelInd,@RequestHeader("relationshipNumber") String relationshipNbr,
+			@RequestHeader("org") String organization) throws DatatypeConfigurationException {		
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("client_id", clientId);
+		headers.set("Authorization", auth);
+		headers.set("uuid", uuid);
+		headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		requestData = new HashMap<String, String>();
+		requestData.put("terminalId", termId);
+		requestData.put("userId", user);
+		requestData.put("channelIndicator", channelInd);
+		requestData.put("relationshipNumber", relationshipNbr);
+		requestData.put("org", organization);
+		
+		if(cusId != null){
+			requestData = new HashMap<String, String>();
+			requestData.put("releationshipNbr", cusId);
+		}else{
+			throw new RuntimeException("Customer relationship number should not be null");
+		}		
+		
+		creditCards = new CardResponse();
+
+		try {
+			creditCards = cardService.getCardsByCustomer(cusId, headers, requestData);
+			logger.info("creditCards  --->" + creditCards);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		} catch (DatatypeConfigurationException e) {
+			throw new RuntimeException(e);
+		}		
+		return new ResponseEntity<CardResponse>(creditCards,HttpStatus.OK);
+	}
+	/*
+	 * 
+	 * 
+	 * This service returns block the card status based on credit card number.
+	 * 
+	 
+
+	@RequestMapping(value = "/cards/serving/block", method = RequestMethod.POST)
+	@ApiOperation(value = "blockCard", nickname = "Temporarily block/lock the credit card")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Success"),
+			@ApiResponse(code = 401, message = "Unauthorized"), @ApiResponse(code = 403, message = "Forbidden"),
+			@ApiResponse(code = 500, message = "Failure") })
+	public ResponseEntity<BlockCardStatus> blockCard(@RequestBody BlockCardRequest req, @RequestHeader("client_id") String clientId,
+			@RequestHeader("Authorization") String auth, @RequestHeader("uuid") String uuid,
+			@RequestHeader("Content-Type") String contentType, @RequestHeader("Accept") String accept) throws Exception {
+		responseData = new ResponseData();
+		ResponseData data = null;
+		// uuid = UUID.randomUUID().toString();
+		// HttpHeaders headers = new HttpHeaders();
+		String cardNumber = req.getCardNumber();
+		String durations = req.getDurationDays();
+		if (cardNumber != "" && cardNumber!= null) {
+			if(cardNumber.length() >= 16){
+				if (durations != "" && durations != null) {
+					data = cardService.blockCard(req);
+				}else {			
+					   CardException ce = new CardException();
+					   ce.throwMissingParameterException();			
+				}
+			}else {			
+				   CardException ce = new CardException();
+				   ce.throwParameterLengthException();		
+			}
+			
+		} else {			
+			   CardException ce = new CardException();
+			   ce.throwMissingParameterException();			
+		}
+
+		//logger.info("Block card Response code ///////// " + data.getEWOEW2XLOperationResponse().getMli_2xl_o_area()
+		//	.getMli_2xl_o_hdr_grp().getMli_2xl_o_error_code());
+		if (data != null && data.getEWOEW2XLOperationResponse().getMli_2xl_o_area().getMli_2xl_o_hdr_grp()
+				.getMli_2xl_o_error_code() != null) {
+			if (data.getEWOEW2XLOperationResponse().getMli_2xl_o_area().getMli_2xl_o_hdr_grp().getMli_2xl_o_error_code()
+					.equals("0000")) {
+				status = new BlockCardStatus();
+				status.setStatus("SUCCESS");
+			} else {
+				status.setStatus("UNSUCCESSFUL");
+			}
+		} else {
+
+		}
+		//return status;
+		return new ResponseEntity<BlockCardStatus>(status,HttpStatus.OK);
+		
+	}
+
+	@RequestMapping(value = "/cards/serving/unblock", method = RequestMethod.POST)
+	@ApiOperation(value = "unBlockCard", nickname = "Unblock the card by card number")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Success"),
+			@ApiResponse(code = 401, message = "Unauthorized"), @ApiResponse(code = 403, message = "Forbidden"),
+			@ApiResponse(code = 500, message = "Failure") })
+	public ResponseEntity<BlockCardStatus> unBlockCard(@RequestBody UnBlockCardRequest req, @RequestHeader("client_id") String clientId,
+			@RequestHeader("Authorization") String auth, @RequestHeader("uuid") String uuid,
+			@RequestHeader("Content-Type") String contentType, @RequestHeader("Accept") String accept) throws Exception {
+		response = new UnBlockCardResponse();
+		String cardNbr = req.getCardNumber();
+		if (cardNbr != "" && cardNbr!= null) {
+			if(cardNbr.length() >= 16){
+				response = cardService.unBlockCard(req);
+			}else {			
+				   CardException ce = new CardException();
+				   ce.throwParameterLengthException();			
+			}
+			
+		} else {			
+			   CardException ce = new CardException();
+			   ce.throwMissingParameterException();			
+		}
+		
+		//logger.info("Unblock card Response code ///////// " + response.getEWOEW2XMOperationResponse()
+		//		.getMli_2xm_o_area().getMli_2xm_o_hdr_grp().getMli_2xm_o_error_code());
+		
+		
+		if (response != null && response.getEWOEW2XMOperationResponse().getMli_2xm_o_area().getMli_2xm_o_hdr_grp()
+				.getMli_2xm_o_error_code() != null) {
+			if (response.getEWOEW2XMOperationResponse().getMli_2xm_o_area().getMli_2xm_o_hdr_grp()
+					.getMli_2xm_o_error_code().equals("0000")) {
+				status = new BlockCardStatus();
+				status.setStatus("SUCCESS");
+			} else {
+				status.setStatus("UNSUCCESSFUL");
+			}
+		} else {
+
+		}
+		return new ResponseEntity<BlockCardStatus>(status,HttpStatus.OK);
+	}
+*/
+}
