@@ -1,0 +1,46 @@
+CardList API:
+
+
+curl -X GET \
+  https://citibanamex-api-cards.cfapps-gcg-gtdc1.citipaas-dev.dyn.nsroot.net/creditCards/customerAccounts/customer/0004053060600392296/accounts \
+  -H 'accept: application/json' \
+  -H 'authorization: Basic dGVzdDAwMTpwd2QwMDE=' \
+  -H 'channelindicator: ECL' \
+  -H 'client_id: ffe4d269-1c59-493b-94f4-fbca960bc0f0' \
+  -H 'content-type: application/json' \
+  -H 'org: 322' \
+  -H 'relationshipnumber: 0000000000059411393' \
+  -H 'terminalid: 00000000MX' \
+  -H 'userid: dfdfdfdd' \
+  -H 'uuid: dsdasdasdkaskdasklncasl'
+  
+  
+  Block Card:
+  
+  curl -X POST \
+  'https://citibanamex-api-cards.cfapps-gcg-gtdc1.citipaas-dev.dyn.nsroot.net/creditCards/cardServicing/0005449250000005891/block?blockDurationInDays=10' \
+  -H 'accept: application/json' \
+  -H 'authorization: Basic ewh2r3rpr4r443r' \
+  -H 'client_id: ewddsdodidsd' \
+  -H 'content-type: application/json' \
+  -H 'messageid: 0003' \
+  -H 'org: 322' \
+  -H 'terminalid: 00000000MX' \
+  -H 'userid: RG07925' \
+  -H 'uuid: dsddsadsadkd' \
+  -H 'versionnbr: 15'
+  
+  UnBlock card:
+  
+  curl -X POST \
+ https://citibanamex-api-cards.cfapps-gcg-gtdc1.citipaas-dev.dyn.nsroot.net/creditCards/cardServicing/0005449250000005891/unblock \
+  -H 'accept: application/json' \
+  -H 'authorization: Basic rerr45' \
+  -H 'client_id: sdadsfdff' \
+  -H 'content-type: application/json' \
+  -H 'messageid: 6004' \
+  -H 'org: 000' \
+  -H 'terminalid: ECLCARDSMX' \
+  -H 'userid: RG07925' \
+  -H 'uuid: ewfdfdsdsc' \
+  -H 'versionnbr: 00'
